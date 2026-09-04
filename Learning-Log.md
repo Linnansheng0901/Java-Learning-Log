@@ -9,3 +9,5 @@
 ## 9.3(4h)
 将剩下的继承学完了，下载了一下VMware，明天将Linux配置好
 
+## 9.4(4h)
+今天安装好了Linux，javaSE学了API，准备开始数据结构Java
