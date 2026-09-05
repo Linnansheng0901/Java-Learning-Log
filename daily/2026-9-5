@@ -1,0 +1,199 @@
+## 8.集合
+
+                        集合
+                         │
+              ┌──────────┴──────────┐
+              │                     │
+          Collection              Map
+              │                     │
+        ┌─────┴─────┐         ┌─────┴─────┐
+        │           │         │           │
+       List         Set     HashMap     TreeMap
+        │           │
+     ┌──┴──┐         ┌──┴───┐
+     │     │         │      │
+    ArrayList LinkedList   HashSet TreeSet
+
+### 8.1泛型
+
+限制数据类型；取数据时不需要强制类型转换。
+
+泛型需要写的是包装类
+
+`ArrayList<Integer> list = new ArrayList<>();`------可以动态扩容的数组式集合
+
+集合的具体实现             引用变量
+
+### 8.3Collection常用方法
+
+```text
+add()       添加
+remove()    删除
+contains()  判断是否包含
+size()      获取元素数量
+clear()     清空
+isEmpty()   判断是否为空
+```
+
+### 8.4List
+
+有序、可重复、有索引
+
+| 操作       | ArrayList | LinkedList      |
+| ---------- | --------- | --------------- |
+| `get(i)`   | **O(1)**  | **O(n)**        |
+| `set(i,x)` | **O(1)**  | **O(n)**        |
+| 尾部添加   | O(1)均摊  | O(1)            |
+| 中间删除   | O(n)      | 找位置需要 O(n) |
+| 随机访问   | **强**    | **弱**          |
+
+```text
+ArrayList
+├── get(i)       → 快
+├── set(i,x)     → 快
+├── 尾部 add()   → 快
+└── 中间删除     → 慢
+
+LinkedList
+├── get(i)       → 慢
+├── set(i,x)     → 慢
+├── 已知节点修改 → 快
+└── 首尾操作     → 很方便
+```
+
+####ArrayList
+
+```java
+增 → add()
+查 → get()
+改 → set(0,"Go")
+删 → remove()
+```
+
+**`remove()`**
+
+remove(1)--->删除索引为1的数据
+
+remove(Integer.valueOf(1))--->删除数据的内容为1
+
+**动态扩容O(n)：容量不够->申请更大的空间->复制数据->释放旧空间**
+
+ArrayList：平时加得快，扩容时复制数据会慢，但扩容不是每次发生，所以长期平均很快。
+
+#### LinkedList
+
+**`LinkedList<String> list = new LinkedList<>();`**
+
+底层：链表，擅长首位修改
+
+[A] → [B] → [C] → [D]
+
+set(2,"Go")---里面的2是节点数，是一个个遍历找到的
+
+```text
+addFirst()------>首部添加
+addLast()------->尾部添加
+removeFirst()--->首部删除
+removeLast()---->尾部删除
+```
+
+### 8.5Set
+
+不可重复
+
+####HashSet
+
+```text
+**核心任务
+add("Java")
+     ↓
+计算 hashCode()---根据字符串内容计算
+     ↓
+确定大致位置
+     ↓
+如果那里已经有元素
+     ↓
+再用 equals() 比较
+     ↓
+判断是否真的重复
+```
+
+```text
+              两个对象
+                 │
+       ┌─────────┼─────────┐
+       ↓         ↓         ↓
+      ==       equals()  hashCode()
+       │         │         │
+       ↓         ↓         ↓
+   是否同一个   是否逻辑    哈希值
+     对象       上相等      是否相同
+```
+
+重写equals(),防止对象不一样但学号和名字都一样
+
+```text
+HashSet
+ ↓
+判断两个对象是否重复
+ ↓
+使用 hashCode + equals
+ ↓
+equals 判断相等
+ ↓
+第二个对象不再加入
+```
+
+```java
+class Student{
+    String name;
+    int id;
+    public Student(String name,int id){
+        this.name = name;
+        this.id = id;
+    }
+    @Override
+    public boolean equals(Object o){
+        if(this == o){   //是不是同一个对象
+            return true;
+        }
+        if(o == null || getClass() != o.getClass()){
+            //o是不是null or 是不是同一种类型
+            return false;
+        }
+        //强制数据转换
+        Student student = (Student) o;
+        return id == student.id;
+    }
+    //根据Student的id计算一个哈希值
+    @Override
+    public int hashCode(){
+        return Integer.hashCode(id);
+    }
+}
+```
+
+```java
+Student s1 = new Student("张三",1001);
+Student s2 = new Student("张三",1001);
+HashSet<Student> set = new HashSet<>();
+set.add(s1);
+set.add(s2);---执行s1.equals(s2)
+System.out.println(set.size());
+
+-1
+```
+
+1.getClass()---查看对象的运行时实际类型
+
+2.s1.equals(s2);---s1:this;s2:o
+
+3.使用object数据类型是参数原因：equals()定义在Object里面。Student要重新这个方法也必须保持参数是Object
+
+4.这里equals方法的参数数据类型是object，但是object是所有java类的最终父类，所以Student的对象可以调用该方法
+
+5.重写的equals的顺序是告诉java：o实际上是Student，现在我要把它按照Student来使用
+
+6.重构hashCode：我们代码规定id相同就要equals()相同但hashCode也必须相同，所以按照Student的id来计算哈希值，否则按照之前的对象不同其他都相同的情况下hashCode会不同
+
+##### 哈希冲突
